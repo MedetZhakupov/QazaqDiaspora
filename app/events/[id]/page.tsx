@@ -174,8 +174,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                   <h3 className="font-semibold text-amber-900">Қатысушылар</h3>
                 </div>
                 <p className="text-amber-800 ml-7">
-                  {registrationCount}
-                  {eventWithProfile.max_attendees && ` / ${eventWithProfile.max_attendees}`}
+                  {registrationCount}/{eventWithProfile.max_attendees}
+                  {/* {eventWithProfile.max_attendees && ` / ${eventWithProfile.max_attendees}`} */}
                   {isFull && <span className="ml-2 text-rose-600 font-bold">(Толды)</span>}
                 </p>
               </div>
