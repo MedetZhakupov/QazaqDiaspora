@@ -148,9 +148,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                 <p className="text-blue-800 ml-7">
                   {formatDate(eventWithProfile.start_date)}
                 </p>
-                <p className="text-sm text-blue-700 ml-7 mt-1">
+                {/* <p className="text-sm text-blue-700 ml-7 mt-1">
                   {formatDate(eventWithProfile.end_date)} дейін
-                </p>
+                </p> */}
               </div>
 
               {eventWithProfile.location && (
