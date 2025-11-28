@@ -261,10 +261,10 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
             {!user && (
               <div className="bg-blue-50 border-2 border-blue-300 text-blue-800 px-6 py-4 rounded-2xl">
+                Іс-шараға тіркелу үшін{' '}
                 <Link href="/auth/login" className="font-bold underline hover:text-blue-900">
-                  Жүйеге кіріңіз
+                  жүйеге кіріңіз
                 </Link>
-                {' '}іс-шараға тіркелу үшін
               </div>
             )}
           </div>
