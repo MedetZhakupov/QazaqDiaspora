@@ -276,7 +276,7 @@ async function sendRegistrationEmails(
       .eq('event_id', eventId)
 
     // Calculate total attendees (each registration = 1 person + their guests)
-    const totalAttendees = allRegistrations?.reduce((total, reg) => {
+    const totalAttendees = allRegistrations?.reduce((total: number, reg: any) => {
       return total + 1 + (reg.guest_count || 0)
     }, 0) || 0
 
