@@ -112,7 +112,7 @@ export default async function Home() {
                   {/* Content */}
                   <div className="relative h-full flex flex-col justify-end p-8 md:p-12">
                     <div className="max-w-4xl">
-                      <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 leading-tight break-words">
+                      <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-gray-900 mb-6 leading-tight break-normal hyphens-auto">
                         {event.title}
                       </h2>
 
