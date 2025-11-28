@@ -85,13 +85,16 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     registration = data
   }
 
-  const { count, error: countError } = await supabase
+  // Fetch all registrations with guest counts to calculate total attendees
+  const { data: allRegistrations, error: countError } = await supabase
     .from('event_registrations')
-    .select('*', { count: 'exact', head: true })
+    .select('id, guest_count')
     .eq('event_id', id)
 
-  console.log('Registration count query:', { event_id: id, count, countError })
-  registrationCount = count || 0
+  // Calculate total attendees (each registration = 1 person + their guests)
+  registrationCount = allRegistrations?.reduce((total, reg) => {
+    return total + 1 + (reg.guest_count || 0)
+  }, 0) || 0
 
   const isOrganizer = user?.id === eventWithProfile.organizer_id
   const isFull = eventWithProfile.max_attendees && registrationCount >= eventWithProfile.max_attendees
@@ -229,6 +232,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
               <EventRegistration
                 eventId={id}
                 menuItems={menuItems}
+                maxGuestsPerRegistration={eventWithProfile.max_guests_per_registration || 4}
                 registerAction={registerForEvent}
               />
             )}

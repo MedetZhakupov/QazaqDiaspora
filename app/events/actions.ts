@@ -16,14 +16,19 @@ export async function createEvent(formData: FormData) {
     return { error: 'You must be logged in to create an event' }
   }
 
+  // Convert datetime-local to ISO string with local timezone
+  const startDate = formData.get('start_date') as string
+  const endDate = formData.get('end_date') as string
+
   const eventData = {
     title: formData.get('title') as string,
     description: formData.get('description') as string,
     location: formData.get('location') as string,
     image_url: formData.get('image_url') as string || null,
-    start_date: formData.get('start_date') as string,
-    end_date: formData.get('end_date') as string,
+    start_date: startDate,
+    end_date: endDate,
     max_attendees: parseInt(formData.get('max_attendees') as string) || null,
+    max_guests_per_registration: parseInt(formData.get('max_guests_per_registration') as string) || 4,
     organizer_id: user.id,
   }
 
@@ -83,6 +88,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     start_date: formData.get('start_date') as string,
     end_date: formData.get('end_date') as string,
     max_attendees: parseInt(formData.get('max_attendees') as string) || null,
+    max_guests_per_registration: parseInt(formData.get('max_guests_per_registration') as string) || 4,
   }
 
   const { error } = await supabase
@@ -125,6 +131,7 @@ export async function deleteEvent(eventId: string) {
 
 export async function registerForEvent(
   eventId: string,
+  guestCount: number,
   menuSelections?: { menuItemId: string; quantity: number }[]
 ) {
   const supabase = await createClient()
@@ -151,6 +158,7 @@ export async function registerForEvent(
     .insert([{
       event_id: eventId,
       user_id: user.id,
+      guest_count: guestCount,
     }])
     .select()
     .single()
@@ -184,7 +192,7 @@ export async function registerForEvent(
   }
 
   // Send confirmation emails (non-blocking)
-  sendRegistrationEmails(supabase, eventId, user.id, user.email || '', menuSelections || [])
+  sendRegistrationEmails(supabase, eventId, user.id, user.email || '', guestCount, menuSelections || [])
     .catch(error => {
       console.error('Error sending registration emails:', error)
     })
@@ -198,6 +206,7 @@ async function sendRegistrationEmails(
   eventId: string,
   userId: string,
   userEmail: string,
+  guestCount: number,
   menuSelections: { menuItemId: string; quantity: number }[]
 ) {
   // Skip if Resend is not configured
@@ -260,11 +269,16 @@ async function sendRegistrationEmails(
       }
     }
 
-    // Get total registration count
-    const { count } = await supabase
+    // Get all registrations with guest counts to calculate total attendees
+    const { data: allRegistrations } = await supabase
       .from('event_registrations')
-      .select('*', { count: 'exact', head: true })
+      .select('id, guest_count')
       .eq('event_id', eventId)
+
+    // Calculate total attendees (each registration = 1 person + their guests)
+    const totalAttendees = allRegistrations?.reduce((total, reg) => {
+      return total + 1 + (reg.guest_count || 0)
+    }, 0) || 0
 
     const attendeeName = attendeeProfile?.full_name || 'Қатысушы'
     const organizerName = organizerProfile?.full_name || 'Ұйымдастырушы'
@@ -286,7 +300,8 @@ async function sendRegistrationEmails(
         userEmail,
         event,
         menuClaims,
-        count || 1
+        guestCount,
+        totalAttendees
       )
       await resend.emails.send({
         from: 'Қазақ Диаспорасы <noreply@qazaqdiaspora.nl>',

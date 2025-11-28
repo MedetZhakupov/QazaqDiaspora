@@ -61,13 +61,8 @@ export function getAttendeeConfirmationEmail(
                 <h2 style="color: #1e40af; margin-top: 0;">Іс-шара туралы:</h2>
 
                 <p style="margin: 8px 0;">
-                  <strong>📅 Басталуы:</strong><br/>
+                  <strong>📅 Күні мен уақыты:</strong><br/>
                   ${formatDate(event.start_date)}
-                </p>
-
-                <p style="margin: 8px 0;">
-                  <strong>⏰ Аяқталуы:</strong><br/>
-                  ${formatDate(event.end_date)}
                 </p>
 
                 ${event.location ? `
@@ -106,7 +101,8 @@ export function getOrganizerNotificationEmail(
   attendeeEmail: string,
   event: EventDetails,
   menuClaims: MenuClaim[],
-  totalRegistrations: number
+  guestCount: number,
+  totalAttendees: number
 ) {
   const menuItemsList = menuClaims.length > 0
     ? `
@@ -149,12 +145,20 @@ export function getOrganizerNotificationEmail(
                   <strong>📧 Email:</strong> ${attendeeEmail}
                 </p>
 
+                <p style="margin: 8px 0;">
+                  <strong>👥 Қонақтар саны:</strong> ${guestCount}
+                </p>
+
+                <p style="margin: 8px 0;">
+                  <strong>✅ Барлығы:</strong> ${1 + guestCount} адам (тіркелуші + ${guestCount} қонақ)
+                </p>
+
                 ${menuItemsList}
               </div>
 
               <div style="background: #eff6ff; padding: 16px; border-radius: 8px; margin-top: 24px;">
                 <p style="margin: 0; color: #1e40af; font-size: 16px;">
-                  <strong>Жалпы қатысушылар саны:</strong> ${totalRegistrations}
+                  <strong>Жалпы қатысушылар саны:</strong> ${totalAttendees}
                 </p>
               </div>
 

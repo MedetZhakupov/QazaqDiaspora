@@ -13,18 +13,33 @@ type MenuItemWithClaims = {
 type EventRegistrationProps = {
   eventId: string
   menuItems: MenuItemWithClaims[]
-  registerAction: (eventId: string, menuSelections?: { menuItemId: string; quantity: number }[]) => Promise<{ error?: string; success?: boolean }>
+  maxGuestsPerRegistration: number
+  registerAction: (eventId: string, guestCount: number, menuSelections?: { menuItemId: string; quantity: number }[]) => Promise<{ error?: string; success?: boolean }>
 }
 
-export default function EventRegistration({ eventId, menuItems, registerAction }: EventRegistrationProps) {
+export default function EventRegistration({ eventId, menuItems, maxGuestsPerRegistration, registerAction }: EventRegistrationProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [guestCount, setGuestCount] = useState(0)
 
   const handleRegister = async (selectedItems: { menuItemId: string; quantity: number }[]) => {
     setIsLoading(true)
     setError(null)
 
-    const result = await registerAction(eventId, selectedItems)
+    // Calculate total people (1 for registrant + guest count)
+    const totalPeople = 1 + guestCount
+
+    // Calculate total menu item quantities
+    const totalMenuQuantity = selectedItems.reduce((sum, item) => sum + item.quantity, 0)
+
+    // Validate that menu items >= total people
+    if (menuItems.length > 0 && totalMenuQuantity < totalPeople) {
+      setError(`Тағам саны келетін адамдар санынан кем болмауы керек. Сіз ${totalPeople} адам үшін кем дегенде ${totalPeople} тағам таңдауыңыз керек.`)
+      setIsLoading(false)
+      return
+    }
+
+    const result = await registerAction(eventId, guestCount, selectedItems)
 
     if (result?.error) {
       setError(result.error)
@@ -42,6 +57,25 @@ export default function EventRegistration({ eventId, menuItems, registerAction }
             {error}
           </div>
         )}
+        {maxGuestsPerRegistration > 0 && (
+          <div className="mb-6 bg-blue-50 border border-blue-200 p-6 rounded-2xl">
+            <label htmlFor="guestCount" className="block text-sm font-semibold text-gray-900 mb-3">
+              Өзіңізбен қоса әкелетін адамдар саны (балалар, отбасы мүшелері)
+            </label>
+            <input
+              type="number"
+              id="guestCount"
+              min="0"
+              max={maxGuestsPerRegistration}
+              value={guestCount}
+              onChange={(e) => setGuestCount(parseInt(e.target.value) || 0)}
+              className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
+            />
+            <p className="mt-2 text-sm text-gray-600">
+              Барлығы: {1 + guestCount} адам (сіз + {guestCount} қонақ)
+            </p>
+          </div>
+        )}
         <button
           onClick={() => handleRegister([])}
           disabled={isLoading}
@@ -55,6 +89,25 @@ export default function EventRegistration({ eventId, menuItems, registerAction }
 
   return (
     <div className="mt-8">
+      {maxGuestsPerRegistration > 0 && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 p-6 rounded-2xl">
+          <label htmlFor="guestCount" className="block text-sm font-semibold text-gray-900 mb-3">
+            Өзіңізбен қоса әкелетін адамдар саны (балалар, отбасы мүшелері)
+          </label>
+          <input
+            type="number"
+            id="guestCount"
+            min="0"
+            max={maxGuestsPerRegistration}
+            value={guestCount}
+            onChange={(e) => setGuestCount(parseInt(e.target.value) || 0)}
+            className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
+          />
+          <p className="mt-2 text-sm text-gray-600">
+            Барлығы: {1 + guestCount} адам (сіз + {guestCount} қонақ). Кем дегенде {1 + guestCount} тағам таңдаңыз.
+          </p>
+        </div>
+      )}
       <MenuSelection
         menuItems={menuItems}
         onRegister={handleRegister}

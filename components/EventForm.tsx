@@ -11,6 +11,7 @@ type Event = {
   start_date: string
   end_date: string
   max_attendees: number | null
+  max_guests_per_registration: number | null
 }
 
 type EventFormProps = {
@@ -36,7 +37,13 @@ export default function EventForm({ action, event, submitLabel }: EventFormProps
   const formatDateTimeLocal = (dateString: string) => {
     if (!dateString) return ''
     const date = new Date(dateString)
-    return date.toISOString().slice(0, 16)
+    // Get the date in local timezone, not UTC
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
   }
 
   return (
@@ -137,19 +144,40 @@ export default function EventForm({ action, event, submitLabel }: EventFormProps
         </div>
       </div>
 
-      <div>
-        <label htmlFor="max_attendees" className="block text-sm font-semibold text-gray-700 mb-2">
-          Қатысушылар саны (міндетті емес)
-        </label>
-        <input
-          type="number"
-          name="max_attendees"
-          id="max_attendees"
-          min="1"
-          defaultValue={event?.max_attendees || ''}
-          className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
-          placeholder="Максималды қатысушылар саны"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label htmlFor="max_attendees" className="block text-sm font-semibold text-gray-700 mb-2">
+            Қатысушылар саны (міндетті емес)
+          </label>
+          <input
+            type="number"
+            name="max_attendees"
+            id="max_attendees"
+            min="1"
+            defaultValue={event?.max_attendees || ''}
+            className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
+            placeholder="Максималды қатысушылар саны"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="max_guests_per_registration" className="block text-sm font-semibold text-gray-700 mb-2">
+            Әр адам әкеле алатын қонақтар саны
+          </label>
+          <input
+            type="number"
+            name="max_guests_per_registration"
+            id="max_guests_per_registration"
+            min="0"
+            max="10"
+            defaultValue={event?.max_guests_per_registration || 4}
+            className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
+            placeholder="4"
+          />
+          <p className="mt-2 text-sm text-gray-500">
+            Тіркелуші өзімен қоса әкеле алатын адамдар саны (балалар, отбасы мүшелері)
+          </p>
+        </div>
       </div>
 
       <div className="border-t border-gray-200 pt-6 mt-6">
