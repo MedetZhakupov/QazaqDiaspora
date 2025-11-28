@@ -1,11 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import MenuItemsManager, { MenuItem } from './MenuItemsManager'
 
 type Event = {
-  title: string
-  description: string | null
+  title_kk: string
+  title_en: string | null
+  description_kk: string | null
+  description_en: string | null
   location: string | null
   image_url: string | null
   start_date: string
@@ -17,12 +20,14 @@ type Event = {
 type EventFormProps = {
   action: (formData: FormData) => Promise<{ error?: string } | void>
   event?: Event
+  initialMenuItems?: MenuItem[]
   submitLabel: string
 }
 
-export default function EventForm({ action, event, submitLabel }: EventFormProps) {
+export default function EventForm({ action, event, initialMenuItems = [], submitLabel }: EventFormProps) {
+  const t = useTranslations('eventForm')
   const [error, setError] = useState<string | null>(null)
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(initialMenuItems)
 
   async function handleSubmit(formData: FormData) {
     // Add menu items to FormData
@@ -54,38 +59,70 @@ export default function EventForm({ action, event, submitLabel }: EventFormProps
         </div>
       )}
 
-      <div>
-        <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
-          Іс-шара атауы
-        </label>
-        <input
-          type="text"
-          name="title"
-          id="title"
-          required
-          defaultValue={event?.title}
-          className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
-          placeholder="Іс-шараның атын енгізіңіз"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label htmlFor="title_kk" className="block text-sm font-semibold text-gray-700 mb-2">
+            {t('title')} (Қазақша) *
+          </label>
+          <input
+            type="text"
+            name="title_kk"
+            id="title_kk"
+            required
+            defaultValue={event?.title_kk}
+            className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
+            placeholder="Іс-шараның атын енгізіңіз"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="title_en" className="block text-sm font-semibold text-gray-700 mb-2">
+            {t('title')} (English)
+          </label>
+          <input
+            type="text"
+            name="title_en"
+            id="title_en"
+            defaultValue={event?.title_en || ''}
+            className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
+            placeholder="Enter event title"
+          />
+        </div>
       </div>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
-          Сипаттама
-        </label>
-        <textarea
-          name="description"
-          id="description"
-          rows={5}
-          defaultValue={event?.description || ''}
-          className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none text-gray-900 bg-white"
-          placeholder="Іс-шара туралы толық ақпарат"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label htmlFor="description_kk" className="block text-sm font-semibold text-gray-700 mb-2">
+            {t('description')} (Қазақша)
+          </label>
+          <textarea
+            name="description_kk"
+            id="description_kk"
+            rows={5}
+            defaultValue={event?.description_kk || ''}
+            className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none text-gray-900 bg-white"
+            placeholder="Іс-шара туралы толық ақпарат"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="description_en" className="block text-sm font-semibold text-gray-700 mb-2">
+            {t('description')} (English)
+          </label>
+          <textarea
+            name="description_en"
+            id="description_en"
+            rows={5}
+            defaultValue={event?.description_en || ''}
+            className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none text-gray-900 bg-white"
+            placeholder="Full event information"
+          />
+        </div>
       </div>
 
       <div>
         <label htmlFor="location" className="block text-sm font-semibold text-gray-700 mb-2">
-          Орны
+          {t('location')}
         </label>
         <input
           type="text"
@@ -99,7 +136,7 @@ export default function EventForm({ action, event, submitLabel }: EventFormProps
 
       <div>
         <label htmlFor="image_url" className="block text-sm font-semibold text-gray-700 mb-2">
-          Сурет URL (міндетті емес)
+          {t('imageUrl')}
         </label>
         <input
           type="url"
@@ -109,15 +146,12 @@ export default function EventForm({ action, event, submitLabel }: EventFormProps
           className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
           placeholder="https://example.com/image.jpg"
         />
-        <p className="mt-2 text-sm text-gray-500">
-          Іс-шараның артқы фон суретінің сілтемесін енгізіңіз
-        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label htmlFor="start_date" className="block text-sm font-semibold text-gray-700 mb-2">
-            Басталу күні мен уақыты
+            {t('startDate')}
           </label>
           <input
             type="datetime-local"
@@ -131,7 +165,7 @@ export default function EventForm({ action, event, submitLabel }: EventFormProps
 
         <div>
           <label htmlFor="end_date" className="block text-sm font-semibold text-gray-700 mb-2">
-            Аяқталу күні мен уақыты
+            {t('endDate')}
           </label>
           <input
             type="datetime-local"
@@ -147,7 +181,7 @@ export default function EventForm({ action, event, submitLabel }: EventFormProps
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label htmlFor="max_attendees" className="block text-sm font-semibold text-gray-700 mb-2">
-            Қатысушылар саны (міндетті емес)
+            {t('maxAttendees')}
           </label>
           <input
             type="number"
@@ -162,7 +196,7 @@ export default function EventForm({ action, event, submitLabel }: EventFormProps
 
         <div>
           <label htmlFor="max_guests_per_registration" className="block text-sm font-semibold text-gray-700 mb-2">
-            Әр адам әкеле алатын қонақтар саны
+            {t('maxGuestsPerRegistration')}
           </label>
           <input
             type="number"
@@ -174,18 +208,12 @@ export default function EventForm({ action, event, submitLabel }: EventFormProps
             className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
             placeholder="4"
           />
-          <p className="mt-2 text-sm text-gray-500">
-            Тіркелуші өзімен қоса әкеле алатын адамдар саны (балалар, отбасы мүшелері)
-          </p>
         </div>
       </div>
 
       <div className="border-t border-gray-200 pt-6 mt-6">
         <div className="mb-4">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Тағам мәзірі</h3>
-          <p className="text-gray-600">
-            Қатысушылар тіркелу үшін өздерімен әкелетін тағамды таңдауы керек
-          </p>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">{t('menuItems')}</h3>
         </div>
         <MenuItemsManager menuItems={menuItems} onChange={setMenuItems} />
       </div>

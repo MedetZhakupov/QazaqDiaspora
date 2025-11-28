@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import MenuSelection from './MenuSelection'
+import { useTranslations } from 'next-intl'
 
 type MenuItemWithClaims = {
   id: string
@@ -18,6 +19,7 @@ type EventRegistrationProps = {
 }
 
 export default function EventRegistration({ eventId, menuItems, maxGuestsPerRegistration, registerAction }: EventRegistrationProps) {
+  const t = useTranslations('registration')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [guestCount, setGuestCount] = useState(0)
@@ -37,7 +39,7 @@ export default function EventRegistration({ eventId, menuItems, maxGuestsPerRegi
 
     // Validate that menu items >= total people (only if items are available)
     if (menuItems.length > 0 && !allItemsExhausted && totalMenuQuantity < totalPeople) {
-      setError(`Тағам саны келетін адамдар санынан кем болмауы керек. Сіз ${totalPeople} адам үшін кем дегенде ${totalPeople} тағам таңдауыңыз керек.`)
+      setError(t('foodValidation', { total: totalPeople }))
       setIsLoading(false)
       return
     }
@@ -63,7 +65,7 @@ export default function EventRegistration({ eventId, menuItems, maxGuestsPerRegi
         {maxGuestsPerRegistration > 0 && (
           <div className="mb-6 bg-blue-50 border border-blue-200 p-6 rounded-2xl">
             <label htmlFor="guestCount" className="block text-sm font-semibold text-gray-900 mb-3">
-              Өзіңізбен қоса әкелетін адамдар саны (балалар, отбасы мүшелері)
+              {t('guestCount')}
             </label>
             <input
               type="number"
@@ -75,7 +77,7 @@ export default function EventRegistration({ eventId, menuItems, maxGuestsPerRegi
               className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
             />
             <p className="mt-2 text-sm text-gray-600">
-              Барлығы: {1 + guestCount} адам (сіз + {guestCount} қонақ)
+              {t('totalPeople', { total: 1 + guestCount, guests: guestCount })}
             </p>
           </div>
         )}
@@ -84,7 +86,7 @@ export default function EventRegistration({ eventId, menuItems, maxGuestsPerRegi
           disabled={isLoading}
           className="w-full px-8 py-4 rounded-xl font-semibold transition shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Өңделуде...' : 'Іс-шараға тіркелу'}
+          {isLoading ? t('processing', { ns: 'event' }) : t('register', { ns: 'event' })}
         </button>
       </div>
     )
@@ -95,7 +97,7 @@ export default function EventRegistration({ eventId, menuItems, maxGuestsPerRegi
       {maxGuestsPerRegistration > 0 && (
         <div className="mb-6 bg-blue-50 border border-blue-200 p-6 rounded-2xl">
           <label htmlFor="guestCount" className="block text-sm font-semibold text-gray-900 mb-3">
-            Өзіңізбен қоса әкелетін адамдар саны (балалар, отбасы мүшелері)
+            {t('guestCount')}
           </label>
           <input
             type="number"
@@ -107,7 +109,7 @@ export default function EventRegistration({ eventId, menuItems, maxGuestsPerRegi
             className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-gray-900 bg-white"
           />
           <p className="mt-2 text-sm text-gray-600">
-            Барлығы: {1 + guestCount} адам (сіз + {guestCount} қонақ). Кем дегенде {1 + guestCount} тағам таңдаңыз.
+            {t('totalPeople', { total: 1 + guestCount, guests: guestCount })}
           </p>
         </div>
       )}

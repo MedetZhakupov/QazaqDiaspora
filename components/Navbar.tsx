@@ -1,8 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
-import { signout } from '@/app/auth/actions'
+import { signout } from '@/app/[locale]/auth/actions'
 import Link from 'next/link'
+import { getTranslations, getLocale } from 'next-intl/server'
+import LanguageSwitcher from './LanguageSwitcher'
 
 export default async function Navbar() {
+  const t = await getTranslations('navbar')
+  const locale = await getLocale()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -27,23 +31,24 @@ export default async function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold flex items-center gap-3 hover:opacity-80 transition group">
+            <Link href={`/${locale}`} className="text-2xl font-bold flex items-center gap-3 hover:opacity-80 transition group">
               <span className="text-3xl group-hover:scale-110 transition-transform">🇰🇿</span>
               <span className="text-gray-900">
-                Қазақтар қоғамдастығы
+                {locale === 'kk' ? 'Қазақтар қоғамдастығы' : 'Kazakh Community'}
               </span>
             </Link>
           </div>
 
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             {user ? (
               <>
                 {isAdmin && (
                   <Link
-                    href="/events/create"
+                    href={`/${locale}/events/create`}
                     className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/50 transition-all font-semibold hover:scale-105"
                   >
-                    Іс-шара құру
+                    {t('createEvent')}
                   </Link>
                 )}
                 <span className="text-gray-600 px-3 hidden md:inline">{user.email}</span>
@@ -52,23 +57,23 @@ export default async function Navbar() {
                     type="submit"
                     className="px-6 py-2.5 text-gray-700 hover:bg-gray-100 rounded-xl transition font-medium border border-gray-300 hover:border-gray-400"
                   >
-                    Шығу
+                    {t('logout')}
                   </button>
                 </form>
               </>
             ) : (
               <>
                 {/* <Link
-                  href="/auth/login"
+                  href={`/${locale}/auth/login`}
                   className="px-6 py-2.5 text-gray-700 hover:bg-gray-100 rounded-xl transition font-medium border border-gray-300 hover:border-gray-400"
                 >
-                  Кіру
+                  {t('login')}
                 </Link>
                 <Link
-                  href="/auth/signup"
+                  href={`/${locale}/auth/signup`}
                   className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/50 transition-all font-semibold hover:scale-105"
                 >
-                  Тіркелу
+                  {t('signup')}
                 </Link> */}
               </>
             )}

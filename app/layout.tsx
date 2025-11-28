@@ -1,21 +1,16 @@
-import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import { getLocale } from 'next-intl/server';
 
-export const metadata: Metadata = {
-  title: "Қазақ Диаспорасы - Іс-шаралар",
-  description: "Қазақ диаспорасының іс-шараларын басқару платформасы",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="kk">
+    <html lang={locale} suppressHydrationWarning>
       <body className="antialiased">
-        <Navbar />
         {children}
       </body>
     </html>

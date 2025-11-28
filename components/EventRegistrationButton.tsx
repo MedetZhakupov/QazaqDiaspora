@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 type EventRegistrationButtonProps = {
   eventId: string
@@ -13,6 +14,7 @@ export default function EventRegistrationButton({
   registerAction,
   isUnregister = false,
 }: EventRegistrationButtonProps) {
+  const t = useTranslations('event')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -42,7 +44,7 @@ export default function EventRegistrationButton({
             : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
-        {loading ? 'Өңделуде...' : isUnregister ? 'Тіркеуден бас тарту' : 'Іс-шараға тіркелу'}
+        {loading ? t('processing') : isUnregister ? t('unregister') : t('register')}
       </button>
     </div>
   )

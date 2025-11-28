@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 type MenuItemWithClaims = {
   id: string
@@ -16,6 +17,7 @@ type MenuSelectionProps = {
 }
 
 export default function MenuSelection({ menuItems, onRegister, isLoading = false }: MenuSelectionProps) {
+  const t = useTranslations('registration')
   const [selectedItems, setSelectedItems] = useState<Record<string, number>>({})
   const [error, setError] = useState<string | null>(null)
 
@@ -40,7 +42,7 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
 
     // Only require selection if items are available
     if (selections.length === 0 && !allItemsExhausted) {
-      setError('Кем дегенде бір тағам таңдаңыз')
+      setError(t('selectAtLeastOne'))
       return
     }
 
@@ -54,15 +56,15 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
   return (
     <div className="space-y-6">
       {allItemsExhausted ? (
-        <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-6">
+        <div className="bg-green-50 border-2 border-green-300 rounded-xl p-6">
           <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg className="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Барлық тағамдар таусылды
+            {t('allFoodCovered')}
           </h3>
           <p className="text-gray-700">
-            Өкінішке орай, барлық тағамдар алынды. Бірақ сіз әлі де іс-шараға тіркеле аласыз.
+            {t('allFoodCoveredDescription')}
           </p>
         </div>
       ) : (
@@ -71,10 +73,10 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
             <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Өзіңізбен әкелетін тағамды таңдаңыз
+            {t('selectFood')}
           </h3>
           <p className="text-gray-700">
-            Іс-шараға тіркелу үшін кем дегенде бір тағамды таңдау керек
+            {t('selectFoodDescription')}
           </p>
         </div>
       )}
@@ -106,7 +108,7 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
                 <div className="flex-1">
                   <h4 className="font-semibold text-gray-900 text-lg">{item.name}</h4>
                   <p className="text-sm text-gray-600 mt-1">
-                    Қалған: {available} / {item.quantity}
+                    {t('available')}: {available} / {item.quantity}
                   </p>
                 </div>
 
@@ -131,7 +133,7 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
                     </button>
                   </div>
                 ) : (
-                  <span className="text-red-600 font-medium">Бітті</span>
+                  <span className="text-red-600 font-medium">{t('finished')}</span>
                 )}
               </div>
             </div>
@@ -144,14 +146,14 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
           <svg className="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <p>Бұл іс-шараға тағам мәзірі жоқ</p>
+          <p>{t('noMenuItems')}</p>
         </div>
       )}
 
       {totalSelected > 0 && (
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-5">
           <p className="text-green-800 font-semibold">
-            Сіз {totalSelected} тағам таңдадыңыз
+            {t('selectedCount', { count: totalSelected })}
           </p>
         </div>
       )}
@@ -161,7 +163,7 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
         disabled={isLoading}
         className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? 'Тіркелуде...' : allItemsExhausted ? 'Тағамсыз тіркелу' : 'Іс-шараға тіркелу'}
+        {isLoading ? t('registering', { ns: 'event' }) : allItemsExhausted ? t('registerWithoutFood', { ns: 'event' }) : t('register', { ns: 'event' })}
       </button>
     </div>
   )
