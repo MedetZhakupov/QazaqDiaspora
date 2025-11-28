@@ -60,7 +60,7 @@ export default async function Home() {
         <header className="mb-16 text-center">
           <div className="inline-block mb-6">
             <div className="relative">
-              <h1 className="relative text-6xl md:text-7xl font-black text-gray-900 mb-2 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-gray-900 mb-2 tracking-tight">
                 Дүниежүзі қазақтарының қауымдастығының
               </h1>
             </div>
