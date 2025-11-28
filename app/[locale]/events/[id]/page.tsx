@@ -78,7 +78,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
       .eq('user_id', user.id)
       .in('menu_item_id', menuItems.map(m => m.id))
 
-    userMenuClaims = (claims || []).map(claim => ({
+    userMenuClaims = (claims || []).map((claim: any) => ({
       quantity: claim.quantity,
       name: locale === 'kk' ? claim.menu_items?.name_kk : (claim.menu_items?.name_en || claim.menu_items?.name_kk)
     }))
