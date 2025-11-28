@@ -83,7 +83,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
   const { count } = await supabase
     .from('event_registrations')
-    .select('*', { count: 'exact', head: true })
+    .select('id', { count: 'exact' })
     .eq('event_id', id)
 
   registrationCount = count || 0
