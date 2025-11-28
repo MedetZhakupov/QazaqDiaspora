@@ -142,14 +142,76 @@ export async function registerForEvent(
     return { error: 'Тіркелу үшін жүйеге кіру керек' }
   }
 
+  // Fetch event details
+  const { data: event } = await supabase
+    .from('events')
+    .select('max_attendees')
+    .eq('id', eventId)
+    .single()
+
+  if (!event) {
+    return { error: 'Іс-шара табылмады' }
+  }
+
+  // Check max_attendees limit
+  if (event.max_attendees) {
+    // Get all current registrations with guest counts
+    const { data: allRegistrations } = await supabase
+      .from('event_registrations')
+      .select('id, guest_count')
+      .eq('event_id', eventId)
+
+    // Calculate total current attendees (each registration = 1 person + their guests)
+    const currentAttendees = allRegistrations?.reduce((total: number, reg: any) => {
+      return total + 1 + (reg.guest_count || 0)
+    }, 0) || 0
+
+    // Calculate total people for this registration
+    const newAttendees = 1 + guestCount
+
+    // Check if adding this registration would exceed max_attendees
+    if (currentAttendees + newAttendees > event.max_attendees) {
+      const spotsLeft = event.max_attendees - currentAttendees
+      return {
+        error: spotsLeft > 0
+          ? `Кешіріңіз, тек ${spotsLeft} орын қалды. Сіз ${newAttendees} адам үшін тіркелуге тырысып жатырсыз.`
+          : 'Кешіріңіз, іс-шараға барлық орындар толды'
+      }
+    }
+  }
+
   // Check if event has menu items
   const { data: menuItems } = await supabase
     .from('menu_items')
-    .select('id')
+    .select('id, quantity')
     .eq('event_id', eventId)
 
-  if (menuItems && menuItems.length > 0 && (!menuSelections || menuSelections.length === 0)) {
-    return { error: 'Кем дегенде бір тағам таңдаңыз' }
+  // Check if menu items are available
+  let menuItemsExhausted = false
+  if (menuItems && menuItems.length > 0) {
+    // Get total claimed quantities
+    const { data: menuClaims } = await supabase
+      .from('menu_claims')
+      .select('menu_item_id, quantity')
+      .in('menu_item_id', menuItems.map(m => m.id))
+
+    // Calculate remaining quantities
+    const claimedMap = new Map<string, number>()
+    menuClaims?.forEach((claim: any) => {
+      const current = claimedMap.get(claim.menu_item_id) || 0
+      claimedMap.set(claim.menu_item_id, current + claim.quantity)
+    })
+
+    // Check if all menu items are exhausted
+    menuItemsExhausted = menuItems.every(item => {
+      const claimed = claimedMap.get(item.id) || 0
+      return claimed >= item.quantity
+    })
+
+    // Only require menu selection if items are available
+    if (!menuItemsExhausted && (!menuSelections || menuSelections.length === 0)) {
+      return { error: 'Кем дегенде бір тағам таңдаңыз' }
+    }
   }
 
   // Create registration
@@ -167,8 +229,8 @@ export async function registerForEvent(
     return { error: regError.message }
   }
 
-  // Create menu claims if selections exist
-  if (menuSelections && menuSelections.length > 0 && registration) {
+  // Create menu claims if selections exist (only if menu items are not exhausted)
+  if (menuSelections && menuSelections.length > 0 && registration && !menuItemsExhausted) {
     const menuClaims = menuSelections.map(selection => ({
       menu_item_id: selection.menuItemId,
       user_id: user.id,

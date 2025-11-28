@@ -32,8 +32,11 @@ export default function EventRegistration({ eventId, menuItems, maxGuestsPerRegi
     // Calculate total menu item quantities
     const totalMenuQuantity = selectedItems.reduce((sum, item) => sum + item.quantity, 0)
 
-    // Validate that menu items >= total people
-    if (menuItems.length > 0 && totalMenuQuantity < totalPeople) {
+    // Check if all menu items are exhausted
+    const allItemsExhausted = menuItems.length > 0 && menuItems.every(item => item.quantity - item.claimed === 0)
+
+    // Validate that menu items >= total people (only if items are available)
+    if (menuItems.length > 0 && !allItemsExhausted && totalMenuQuantity < totalPeople) {
       setError(`Тағам саны келетін адамдар санынан кем болмауы керек. Сіз ${totalPeople} адам үшін кем дегенде ${totalPeople} тағам таңдауыңыз керек.`)
       setIsLoading(false)
       return

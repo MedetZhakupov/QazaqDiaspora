@@ -35,7 +35,11 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
       quantity,
     }))
 
-    if (selections.length === 0) {
+    // Check if all menu items are exhausted
+    const allItemsExhausted = menuItems.every(item => item.quantity - item.claimed === 0)
+
+    // Only require selection if items are available
+    if (selections.length === 0 && !allItemsExhausted) {
       setError('Кем дегенде бір тағам таңдаңыз')
       return
     }
@@ -45,20 +49,35 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
   }
 
   const totalSelected = Object.values(selectedItems).reduce((sum, qty) => sum + qty, 0)
+  const allItemsExhausted = menuItems.every(item => item.quantity - item.claimed === 0)
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
-          <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Өзіңізбен әкелетін тағамды таңдаңыз
-        </h3>
-        <p className="text-gray-700">
-          Іс-шараға тіркелу үшін кем дегенде бір тағамды таңдау керек
-        </p>
-      </div>
+      {allItemsExhausted ? (
+        <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
+            <svg className="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Барлық тағамдар таусылды
+          </h3>
+          <p className="text-gray-700">
+            Өкінішке орай, барлық тағамдар алынды. Бірақ сіз әлі де іс-шараға тіркеле аласыз.
+          </p>
+        </div>
+      ) : (
+        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
+            <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Өзіңізбен әкелетін тағамды таңдаңыз
+          </h3>
+          <p className="text-gray-700">
+            Іс-шараға тіркелу үшін кем дегенде бір тағамды таңдау керек
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-50 border-2 border-red-300 text-red-700 px-5 py-4 rounded-xl font-medium">
@@ -139,10 +158,10 @@ export default function MenuSelection({ menuItems, onRegister, isLoading = false
 
       <button
         onClick={handleSubmit}
-        disabled={isLoading || menuItems.every(item => item.quantity - item.claimed === 0)}
+        disabled={isLoading}
         className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? 'Тіркелуде...' : 'Іс-шараға тіркелу'}
+        {isLoading ? 'Тіркелуде...' : allItemsExhausted ? 'Тағамсыз тіркелу' : 'Іс-шараға тіркелу'}
       </button>
     </div>
   )
