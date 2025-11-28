@@ -85,11 +85,12 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     registration = data
   }
 
-  const { count } = await supabase
+  const { count, error: countError } = await supabase
     .from('event_registrations')
-    .select('id', { count: 'exact', head: true })
+    .select('*', { count: 'exact', head: true })
     .eq('event_id', id)
 
+  console.log('Registration count query:', { event_id: id, count, countError })
   registrationCount = count || 0
 
   const isOrganizer = user?.id === eventWithProfile.organizer_id
