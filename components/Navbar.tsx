@@ -58,7 +58,7 @@ export default async function Navbar() {
               </>
             ) : (
               <>
-                <Link
+                {/* <Link
                   href="/auth/login"
                   className="px-6 py-2.5 text-gray-700 hover:bg-gray-100 rounded-xl transition font-medium border border-gray-300 hover:border-gray-400"
                 >
@@ -69,7 +69,7 @@ export default async function Navbar() {
                   className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/50 transition-all font-semibold hover:scale-105"
                 >
                   Тіркелу
-                </Link>
+                </Link> */}
               </>
             )}
           </div>
