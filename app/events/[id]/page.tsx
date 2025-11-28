@@ -6,6 +6,10 @@ import EventRegistration from '@/components/EventRegistration'
 import EventRegistrationButton from '@/components/EventRegistrationButton'
 import DeleteEventButton from '@/components/DeleteEventButton'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
@@ -83,7 +87,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
   const { count } = await supabase
     .from('event_registrations')
-    .select('id', { count: 'exact' })
+    .select('id', { count: 'exact', head: true })
     .eq('event_id', id)
 
   registrationCount = count || 0
