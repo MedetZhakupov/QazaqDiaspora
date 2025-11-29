@@ -403,8 +403,17 @@ async function sendRegistrationEmails(
     const attendeeName = attendeeProfile?.full_name || 'Қатысушы'
     const organizerName = organizerProfile?.full_name || 'Ұйымдастырушы'
 
+    // Map event to expected format for email templates
+    const eventForEmail = {
+      title: event.title_kk || event.title_en || 'Іс-шара',
+      start_date: event.start_date,
+      end_date: event.end_date,
+      location: event.location,
+      description: event.description_kk || event.description_en,
+    }
+
     // Send email to attendee
-    const attendeeEmail = getAttendeeConfirmationEmail(attendeeName, event, menuClaims)
+    const attendeeEmail = getAttendeeConfirmationEmail(attendeeName, eventForEmail, menuClaims)
     await resend.emails.send({
       from: 'Қазақ Диаспорасы <noreply@qazaqdiaspora.nl>',
       to: userEmail,
@@ -418,7 +427,7 @@ async function sendRegistrationEmails(
         organizerName,
         attendeeName,
         userEmail,
-        event,
+        eventForEmail,
         menuClaims,
         guestCount,
         totalAttendees
