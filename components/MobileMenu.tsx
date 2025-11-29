@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import LanguageSwitcher from './LanguageSwitcher'
@@ -16,51 +17,17 @@ export default function MobileMenu({ user, isAdmin, locale, signoutAction }: Mob
   const [isOpen, setIsOpen] = useState(false)
   const t = useTranslations('navbar')
 
-  return (
+  const menuContent = isOpen ? (
     <>
-      {/* Hamburger Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
-        aria-label="Toggle menu"
-      >
-        <svg
-          className="w-6 h-6 text-gray-700"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          {isOpen ? (
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          ) : (
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          )}
-        </svg>
-      </button>
-
       {/* Mobile Menu Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[9998] md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      <div
+        className="fixed inset-0 bg-black/50 z-[9998] md:hidden"
+        onClick={() => setIsOpen(false)}
+      />
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 bg-white shadow-2xl z-[9999] transform transition-transform duration-300 ease-in-out md:hidden ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className="fixed top-0 right-0 h-full w-72 bg-white shadow-2xl z-[9999] transform translate-x-0 transition-transform duration-300 ease-in-out md:hidden"
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -126,6 +93,43 @@ export default function MobileMenu({ user, isAdmin, locale, signoutAction }: Mob
           </div>
         </div>
       </div>
+    </>
+  ) : null
+
+  return (
+    <>
+      {/* Hamburger Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+        aria-label="Toggle menu"
+      >
+        <svg
+          className="w-6 h-6 text-gray-700"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          {isOpen ? (
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          ) : (
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          )}
+        </svg>
+      </button>
+
+      {/* Portal the menu to document body */}
+      {typeof document !== 'undefined' && menuContent && createPortal(menuContent, document.body)}
     </>
   )
 }
