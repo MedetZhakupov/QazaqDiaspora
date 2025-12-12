@@ -467,3 +467,100 @@ export async function unregisterFromEvent(eventId: string) {
   revalidatePath(`/events/${eventId}`)
   return { success: true }
 }
+
+export async function getEventRegistrations(eventId: string) {
+  const supabase = await createClient()
+  const serviceClient = createServiceClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'You must be logged in to view registrations' }
+  }
+
+  // Check if user is the organizer
+  const { data: event } = await supabase
+    .from('events')
+    .select('organizer_id, title_kk, title_en')
+    .eq('id', eventId)
+    .single()
+
+  if (!event || event.organizer_id !== user.id) {
+    return { error: 'Only the event organizer can view registrations' }
+  }
+
+  // Fetch all registrations
+  const { data: registrations, error: regError } = await supabase
+    .from('event_registrations')
+    .select('id, user_id, guest_count, registered_at')
+    .eq('event_id', eventId)
+    .order('registered_at', { ascending: true })
+
+  if (regError) {
+    return { error: regError.message }
+  }
+
+  if (!registrations || registrations.length === 0) {
+    return { data: [] }
+  }
+
+  // Fetch all user profiles
+  const userIds = registrations.map(r => r.user_id)
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, full_name')
+    .in('id', userIds)
+
+  const profilesMap = new Map<string, string>()
+  profiles?.forEach(p => {
+    profilesMap.set(p.id, p.full_name || 'Unknown')
+  })
+
+  // Fetch menu claims for all registrations
+  const registrationIds = registrations.map(r => r.id)
+  const { data: menuClaims } = await supabase
+    .from('menu_claims')
+    .select(`
+      registration_id,
+      quantity,
+      menu_items (
+        name_kk,
+        name_en
+      )
+    `)
+    .in('registration_id', registrationIds)
+
+  // Fetch user emails using service client
+  const userEmails = new Map<string, string>()
+  if (serviceClient) {
+    for (const reg of registrations) {
+      const { data: { user: userData } } = await serviceClient.auth.admin.getUserById(reg.user_id)
+      if (userData?.email) {
+        userEmails.set(reg.user_id, userData.email)
+      }
+    }
+  }
+
+  // Combine data
+  const result = registrations.map((reg: any) => {
+    const claims = menuClaims?.filter(c => c.registration_id === reg.id) || []
+    const foodItems = claims.map((c: any) => ({
+      name: c.menu_items?.name_en || c.menu_items?.name_kk || '',
+      quantity: c.quantity
+    }))
+
+    return {
+      id: reg.id,
+      fullName: profilesMap.get(reg.user_id) || 'Unknown',
+      email: userEmails.get(reg.user_id) || '',
+      guestCount: reg.guest_count || 0,
+      registeredAt: reg.registered_at,
+      foodSelections: foodItems
+    }
+  })
+
+  return {
+    data: result,
+    eventTitle: event.title_en || event.title_kk || 'Event'
+  }
+}

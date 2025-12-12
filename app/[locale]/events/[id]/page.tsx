@@ -5,6 +5,7 @@ import { registerForEvent, unregisterFromEvent, deleteEvent } from '../actions'
 import EventRegistration from '@/components/EventRegistration'
 import EventRegistrationButton from '@/components/EventRegistrationButton'
 import DeleteEventButton from '@/components/DeleteEventButton'
+import { DownloadRegistrationsButton } from '@/components/DownloadRegistrationsButton'
 import { getLocale, getTranslations } from 'next-intl/server'
 
 // Force dynamic rendering
@@ -147,7 +148,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                 {eventWithProfile.title}
               </h1>
               {isOrganizer && (
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
+                  <DownloadRegistrationsButton eventId={id} locale={locale} />
                   <Link
                     href={`/${locale}/events/${id}/edit`}
                     className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium border border-gray-300 hover:border-gray-400"
